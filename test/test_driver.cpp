@@ -10,12 +10,12 @@ DEFINE_FFF_GLOBALS;
 FAKE_VALUE_FUNC(error_code_t, i2cSendTo, uint8_t, uint8_t *, uint16_t);
 FAKE_VALUE_FUNC(error_code_t, i2cReceiveFrom, uint8_t, uint8_t *, uint16_t);
 
-#define FFF_FAKES_LIST(FAKE)  \
-  FAKE(i2cSendTo)             \
+#define FFF_FAKES_LIST(FAKE) \
+  FAKE(i2cSendTo)            \
   FAKE(i2cReceiveFrom)
 
-
-void resetFakes(void) {
+void resetFakes(void)
+{
   /* Register resets */
   FFF_FAKES_LIST(RESET_FAKE);
 
@@ -27,8 +27,10 @@ uint8_t customFakeTxBuff[2] = {0};
 
 // This function is needed because the buff passed into i2cSendTo goes out of scope
 // before the test can check it
-error_code_t i2cSendTo_custom_fake(uint8_t addr, uint8_t *buff, uint16_t numBytes) {
-  if (addr != 0x4FU) {
+error_code_t i2cSendTo_custom_fake(uint8_t addr, uint8_t *buff, uint16_t numBytes)
+{
+  if (addr != 0x4FU)
+  {
     return ERR_CODE_I2C_TRANSFER_TIMEOUT;
   }
 
@@ -38,7 +40,8 @@ error_code_t i2cSendTo_custom_fake(uint8_t addr, uint8_t *buff, uint16_t numByte
   return ERR_CODE_SUCCESS;
 }
 
-TEST(TestLm75bdDriver, TestWriteConfigLm75bdSuccess) {
+TEST(TestLm75bdDriver, TestWriteConfigLm75bdSuccess)
+{
   resetFakes();
 
   uint8_t addr = 0x4FU;
@@ -51,15 +54,16 @@ TEST(TestLm75bdDriver, TestWriteConfigLm75bdSuccess) {
   const uint8_t expectedBuff[2] = {0x1U, 0b00000010U};
 
   EXPECT_EQ(i2cSendTo_fake.call_count, 1);
-  EXPECT_EQ(i2cSendTo_fake.arg0_val, addr); // Check device address
-  EXPECT_EQ(memcmp(customFakeTxBuff, expectedBuff, 2), 0); // Check buffer (reg addr + config byte)  
-  EXPECT_EQ(i2cSendTo_fake.arg2_val, 2U); // Check numBytes
+  EXPECT_EQ(i2cSendTo_fake.arg0_val, addr);                // Check device address
+  EXPECT_EQ(memcmp(customFakeTxBuff, expectedBuff, 2), 0); // Check buffer (reg addr + config byte)
+  EXPECT_EQ(i2cSendTo_fake.arg2_val, 2U);                  // Check numBytes
 }
 
-
 static uint8_t customTempBuff[2] = {0};
-error_code_t getTemp_custom_fake(uint8_t addr, uint8_t *buff, uint16_t numBytes) {
-  if (addr != 0x4FU) {
+error_code_t getTemp_custom_fake(uint8_t addr, uint8_t *buff, uint16_t numBytes)
+{
+  if (addr != 0x4FU)
+  {
     return ERR_CODE_I2C_TRANSFER_TIMEOUT;
   }
 
@@ -69,7 +73,8 @@ error_code_t getTemp_custom_fake(uint8_t addr, uint8_t *buff, uint16_t numBytes)
   return ERR_CODE_SUCCESS;
 }
 
-TEST(TestLm75bdDriver, TestReadTempLm75bdPosTempSuccess) {
+TEST(TestLm75bdDriver, TestReadTempLm75bdPosTempSuccess)
+{
   resetFakes();
 
   uint8_t addr = 0x4FU;
@@ -85,7 +90,8 @@ TEST(TestLm75bdDriver, TestReadTempLm75bdPosTempSuccess) {
   EXPECT_EQ(temp, 127.0f);
 }
 
-TEST(TestLm75bdDriver, TestReadTempLm75bdNegTempSuccess) {
+TEST(TestLm75bdDriver, TestReadTempLm75bdNegTempSuccess)
+{
   resetFakes();
 
   uint8_t addr = 0x4FU;
@@ -101,7 +107,8 @@ TEST(TestLm75bdDriver, TestReadTempLm75bdNegTempSuccess) {
   EXPECT_EQ(temp, -25.0f);
 }
 
-TEST(TestLm75bdDriver, TestReadTempLm75bdCallSequence) {
+TEST(TestLm75bdDriver, TestReadTempLm75bdCallSequence)
+{
   resetFakes();
 
   uint8_t addr = 0x4FU;
@@ -121,9 +128,9 @@ TEST(TestLm75bdDriver, TestReadTempLm75bdCallSequence) {
 
   // Check call arguments
   EXPECT_EQ(i2cSendTo_fake.arg0_val, addr); // Check device address
-  EXPECT_EQ(customFakeTxBuff[0], 0x0U); // Check buffer (reg addr)
-  EXPECT_EQ(i2cSendTo_fake.arg2_val, 1U); // Check numBytes
+  EXPECT_EQ(customFakeTxBuff[0], 0x0U);     // Check buffer (reg addr)
+  EXPECT_EQ(i2cSendTo_fake.arg2_val, 1U);   // Check numBytes
 
   EXPECT_EQ(i2cReceiveFrom_fake.arg0_val, addr); // Check device address
-  EXPECT_EQ(i2cReceiveFrom_fake.arg2_val, 2U); // Check numBytes
+  EXPECT_EQ(i2cReceiveFrom_fake.arg2_val, 2U);   // Check numBytes
 }

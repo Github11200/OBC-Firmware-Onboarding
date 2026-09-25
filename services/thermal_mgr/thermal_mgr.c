@@ -50,14 +50,13 @@ error_code_t thermalMgrSendEvent(thermal_mgr_event_t *event)
 
 void osHandlerLM75BD(void)
 {
-  /* Implement this function */
+  float temp = 0.0;
 }
 
 static void thermalMgr(void *pvParameters)
 {
   lm75bd_config_t configData = *(lm75bd_config_t *)pvParameters;
-
-  /* Implement this task */
+  printConsole("%d\n", configData.hysteresisThresholdCelsius);
   while (1)
   {
     void *pvBuffer;
@@ -69,6 +68,7 @@ static void thermalMgr(void *pvParameters)
 
     float temp = 0.0;
     readTempLM75BD(configData.devAddr, &temp);
+    addTemperatureTelemetry(temp);
   }
 }
 
