@@ -45,13 +45,17 @@ error_code_t readTempLM75BD(uint8_t devAddr, float *temp)
   error_code_t errCode;
   i2cSendTo(LM75BD_OBC_I2C_ADDR, 0x00, 1);
 
-  size_t BUFFER_SIZE = 2; // 2 bytes to read for the temperature sensor
-  uint8_t buf;
+  size_t BUFFER_SIZE = 1; // 2 bytes to read for the temperature sensor
+  uint8_t buf[2] = {0};
 
   // Read the temperature sensor data
-  i2cReceiveFrom(LM75BD_OBC_I2C_ADDR, &buf, BUFFER_SIZE);
+  i2cReceiveFrom(LM75BD_OBC_I2C_ADDR, buf, BUFFER_SIZE);
+  uint16_t rawBits = ((uint16_t)buf[0] << 8) | buf[1];
 
-  *temp = ((int8_t)buf << 3) * 0.125;
+  // Shift it and ignore the 5 bits
+  int16_t num = ((int16_t)rawBits) >> 5;
+
+  *temp = num * 0.125;
 
   return ERR_CODE_SUCCESS;
 }
